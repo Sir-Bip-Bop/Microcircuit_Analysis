@@ -47,3 +47,4 @@ Figure2/
 test_FFT/
 whole_brain/
 connect_matrix.txt
+.venv/
