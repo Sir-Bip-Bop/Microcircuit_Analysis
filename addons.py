@@ -1,3 +1,8 @@
+"""
+.py file originally from the NEST microcrocircuit model, modified to include analysis of the connectivity and synchrony of the network.
+"""
+
+
 import os
 import random
 import matplotlib.pyplot as plt

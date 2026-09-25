@@ -1,3 +1,7 @@
+"""
+.py file originally from the NEST microcrocircuit model, modified to include analysis of the
+connectivity and synchrony of the network.
+"""
 import os
 
 import matplotlib.pyplot as plt
@@ -183,7 +187,18 @@ def adjust_weights_and_input_to_synapse_scaling(
     return PSC_matrix_new, PSC_ext_new, DC_amp_new
 
 
-def plot_raster(path, name, begin, end, N_scaling,binned,M, std,trial,plot,layer=0,rate=8.0,num_neurons = [20683, 5834, 21915, 5479, 4850, 1065, 14395, 2948]):
+# Saturated colours for the poster panels: (raster dots, population-rate trace).
+# L2/3E stays blue and L4E red-family, matching the layer colours used in the
+# spectral entropy, autocorrelation and AIS figures.
+POSTER_COLOURS = {
+    0: ("#1f4fe0", "#08306b"),   # L2/3E: saturated blue dots, dark blue trace
+    2: ("#e31a1c", "#99000d"),   # L4E:   saturated red dots,  dark red trace
+}
+
+
+def plot_raster(path, name, begin, end, N_scaling,binned,M, std,trial,plot,layer=0,rate=8.0,num_neurons = [20683, 5834, 21915, 5479, 4850, 1065, 14395, 2948],
+                dot_color=None, line_color=None, dot_alpha=None, line_alpha=None,
+                markersize=None, save_suffix=""):
     """Creates a spike raster plot of the network activity.
 
     Parameters
@@ -198,6 +213,18 @@ def plot_raster(path, name, begin, end, N_scaling,binned,M, std,trial,plot,layer
         Time point (in ms) to stop plotting spikes (included).
     N_scaling
         Scaling factor for number of neurons.
+    dot_color, line_color
+        Override the raster-dot and population-rate colours in the single-
+        population view (``plot=True``). ``None`` keeps the original pastel
+        palette, so existing calls are unaffected.
+    dot_alpha, line_alpha
+        Override the transparencies (original: 0.4 for both). Saturated
+        colours read better with more opaque dots and a fully opaque trace.
+    markersize
+        Raster dot size; ``None`` keeps the matplotlib default.
+    save_suffix
+        Appended to the saved filename so a restyled figure does not overwrite
+        the original.
 
     Returns
     -------
@@ -284,8 +311,13 @@ def plot_raster(path, name, begin, end, N_scaling,binned,M, std,trial,plot,layer
                        #ax2.plot(times_currents,filtered_signal_plot, linewidth= 3, color="#629ddb",alpha= 0.4)
                        #ax.plot(times[::stp], neurons[::stp], ".", color='gray',alpha = 0.6)
                        #ax2.plot(times_currents,filtered_signal_plot, linewidth= 3, color="black",alpha= 0.4)
-                       ax.plot(times[::stp], neurons[::stp], ".", color=color_list[i],alpha = 0.4)
-                       ax2.plot(times_currents,filtered_signal_plot, linewidth= 3, color=bar_labels[i],alpha= 0.4)
+                       dc = color_list[i] if dot_color is None else dot_color
+                       lc = bar_labels[i] if line_color is None else line_color
+                       da = 0.4 if dot_alpha is None else dot_alpha
+                       la = 0.4 if line_alpha is None else line_alpha
+                       mk = {} if markersize is None else {"markersize": markersize}
+                       ax.plot(times[::stp], neurons[::stp], ".", color=dc, alpha=da, **mk)
+                       ax2.plot(times_currents, filtered_signal_plot, linewidth=3, color=lc, alpha=la)
                        ax.tick_params(axis='x',labelsize=15)
                        ax.tick_params( axis='y',labelsize=15)
                        
@@ -323,7 +355,7 @@ def plot_raster(path, name, begin, end, N_scaling,binned,M, std,trial,plot,layer
                 ax2.set_xlim(begin,end)
                 #ax.set_ylim(0,last_node_id)
                 ax2.set_ylim(0,0.3)
-                plt.savefig(os.path.join("Figure1/"+str(rate)+"raster_plot_"+str(layer)+".svg"), dpi=500)
+                plt.savefig(os.path.join("Figure1/"+str(rate)+"raster_plot_"+str(layer)+save_suffix+".svg"), dpi=500)
             else:
                 ax.set_xlabel("time (ms)", fontsize=fs)
                 ax.set_yticks(label_pos, ylabels, fontsize=fs)
