@@ -56,6 +56,7 @@ connect_matrix.txt
 *.log
 *.npy
 *.mat
+*.csv
 Figure_Thing/
 lfp_out/
 packet_full/
@@ -68,3 +69,6 @@ packet_out_w/
 old_scripts/
 null_out/
 .vscode/
+figures/
+inhib_out/
+lfp_out_abs/
